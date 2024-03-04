@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate NGINX Config</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+
+<body>
+
+    <div class="container mt-5">
+        <h2 class="mb-4">NGINX Config Generator</h2>
+
+        <form id="nginxConfigForm">
+            <div class="form-group">
+                <label for="domainName">Domain Name</label>
+                <input type="text" class="form-control" id="domainName" placeholder="Enter domain name" required>
+            </div>
+            <div class="form-group">
+                <label for="portNumber">Port Number</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="portNumber" placeholder="Enter port number" required>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" onclick="generateRandomPort()">Random
+                            Port</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="generateConfig()">Generate Config</button>
+        </form>
+
+        <div class="mt-4">
+            <label for="nginxConfigOutput">NGINX Config Output</label>
+            <textarea id="nginxConfigOutput" class="form-control" rows="8" readonly></textarea>
+            <button class="btn btn-secondary mt-2" data-clipboard-target="#nginxConfigOutput">Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+    <script>
+        function generateConfig() {
+            var domainName = document.getElementById('domainName').value;
+            var portNumber = document.getElementById('portNumber').value;
+
+            var nginxConfig = `server {
+    listen 80;
+    listen [::]:80;
+    server_name ${domainName};
+
+    location / {
+        proxy_pass http://localhost:${portNumber};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}`;
+
+            document.getElementById('nginxConfigOutput').value = nginxConfig;
+        }
+
+        function generateRandomPort() {
+            var randomPort = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+            document.getElementById('portNumber').value = randomPort;
+        }
+
+        var clipboard = new ClipboardJS('.btn-secondary');
+    </script>
+
+</body>
+
+</html>
